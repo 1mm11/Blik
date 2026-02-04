@@ -3,17 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BlumTik Ultimate - Persistent</title>
+    <title>BlumTik - Messenger PRO</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
-        :root {
-            --primary: #6c5ce7; --bg: #13131d; --panel: #1e1e2e;
-            --text: #ffffff; --text-dim: #a0a0a0; --accent: #fdcb6e; --danger: #ff7675;
-        }
+        :root { --primary: #6c5ce7; --bg: #13131d; --panel: #1e1e2e; --text: #fff; --text-dim: #a0a0a0; --accent: #fdcb6e; --danger: #ff7675; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         body { background-color: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; }
         .hidden { display: none !important; }
@@ -29,9 +26,7 @@
         #sidebar.active { left: 0; }
         .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1400; display: none; }
         .sidebar-overlay.active { display: block; }
-        .profile-card { text-align: center; margin-bottom: 30px; }
-        .avatar-circle { width: 80px; height: 80px; border-radius: 50%; background: var(--primary); margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; font-size: 2em; overflow: hidden; border: 3px solid var(--primary); }
-        .avatar-circle img { width: 100%; height: 100%; object-fit: cover; }
+        
         .menu-item { padding: 15px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 15px; margin-bottom: 5px; }
         .menu-item:hover { background: rgba(255,255,255,0.05); }
 
@@ -41,8 +36,21 @@
         .search-bar { flex: 1; position: relative; }
         .search-bar input { width: 100%; padding: 10px 15px 10px 40px; border-radius: 20px; border: none; background: #13131d; color: white; }
         .search-bar i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--text-dim); }
-        .screen { display: none; flex-direction: column; height: 100%; padding: 20px; overflow-y: auto; }
-        .screen.active { display: flex; }
+
+        .chat-container { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+        .message { padding: 10px 15px; border-radius: 15px; max-width: 80%; position: relative; }
+        .message.mine { align-self: flex-end; background: var(--primary); }
+        .message.theirs { align-self: flex-start; background: var(--panel); }
+
+        .input-area { padding: 15px; background: var(--panel); display: flex; gap: 10px; }
+        .input-area input { flex: 1; padding: 12px; border-radius: 10px; border: none; background: #13131d; color: white; outline: none; }
+        
+        /* SEARCH RESULTS */
+        #search-results { position: absolute; top: 60px; left: 20px; right: 20px; background: var(--panel); border-radius: 15px; z-index: 500; max-height: 300px; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .search-item { padding: 15px; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+
+        .avatar { width: 45px; height: 45px; border-radius: 50%; background: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: bold; overflow: hidden; }
+        .avatar img { width: 100%; height: 100%; object-fit: cover; }
     </style>
 </head>
 <body>
@@ -50,58 +58,61 @@
     <div id="auth-screen">
         <div class="auth-box">
             <h1 style="color:var(--primary); margin-bottom:20px;">BlumTik</h1>
-            <input type="text" id="reg-login" placeholder="Логин (имя 1)">
+            <input type="text" id="reg-login" placeholder="Придумайте ID (имя 1)">
             <input type="password" id="access-code" placeholder="Спец-код">
             <input type="password" id="personal-pass" placeholder="Личный пароль">
-            <button class="btn-main" onclick="handleAuth()">Войти</button>
+            <button class="btn-main" onclick="handleAuth()">Войти / Регистрация</button>
             <p id="auth-error" style="color:var(--danger); margin-top:15px; font-size:0.8em;"></p>
         </div>
     </div>
 
     <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
     <div id="sidebar">
-        <div class="profile-card">
-            <div class="avatar-circle" id="side-avatar">B</div>
+        <div style="text-align: center; margin-bottom: 30px;">
+            <div class="avatar" id="side-avatar" style="width:70px; height:70px; margin: 0 auto 10px; font-size: 1.5em;">B</div>
             <h3 id="side-name2">Имя 2</h3>
-            <p id="side-name1" style="color:var(--text-dim); font-size:0.8em;">@login</p>
+            <p id="side-name1" style="color:var(--text-dim); font-size: 0.8em; font-weight: bold;"></p>
         </div>
-        <div class="menu-item" onclick="showScreen('chats')"><i class="fas fa-comment"></i> Чаты</div>
-        <div class="menu-item" onclick="showScreen('profile')"><i class="fas fa-user-circle"></i> Профиль</div>
-        <div id="admin-menu-item" class="menu-item hidden" onclick="showScreen('admin')"><i class="fas fa-user-shield"></i> Админ Панель</div>
-        <div class="menu-item" style="margin-top:50px; color:var(--danger)" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Выйти из аккаунта</div>
+        <div class="menu-item" onclick="showScreen('chats')"><i class="fas fa-comments"></i> Сообщения</div>
+        <div class="menu-item" onclick="showScreen('profile')"><i class="fas fa-id-card"></i> Мой Профиль</div>
+        <div id="admin-menu-item" class="menu-item hidden" onclick="showScreen('admin')"><i class="fas fa-user-shield"></i> Админка</div>
+        <div class="menu-item" style="margin-top:50px; color:var(--danger)" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Выйти</div>
     </div>
 
     <div id="main-app">
         <header>
-            <i class="fas fa-bars" style="cursor:pointer; font-size:1.2em;" onclick="toggleSidebar()"></i>
-            <div class="search-bar"><i class="fas fa-search"></i><input type="text" placeholder="Поиск..." id="search-input"></div>
+            <i class="fas fa-bars" style="cursor:pointer;" onclick="toggleSidebar()"></i>
+            <div class="search-bar">
+                <i class="fas fa-search"></i>
+                <input type="text" id="user-search" placeholder="Найти человека по ID..." oninput="searchUsers()">
+                <div id="search-results" class="hidden"></div>
+            </div>
         </header>
 
-        <div id="screen-chats" class="screen active">
-            <h2>Ваши чаты</h2>
-            <div id="chat-list" style="margin-top:20px;"></div>
-        </div>
-
-        <div id="screen-profile" class="screen">
-            <h2>Настройки профиля</h2>
-            <div class="profile-card" style="margin-top:20px;">
-                <div class="avatar-circle" id="prof-avatar-big" style="width:120px; height:120px;">B</div>
-                <input type="text" id="change-avatar-url" placeholder="URL аватарки" style="width:100%; padding:10px; margin:10px 0; background:var(--panel); border:none; color:white; border-radius:10px;">
-                <input type="text" id="prof-name2-input" placeholder="Имя 2" style="width:100%; padding:10px; background:var(--panel); border:none; color:white; border-radius:10px;">
-                <button class="btn-main" style="margin-top:20px;" onclick="saveProfile()">Сохранить</button>
+        <div id="screen-chats" class="screen active" style="display:flex; flex-direction:column; height:100%;">
+            <div id="chat-header-info" style="padding: 10px 20px; background: rgba(255,255,255,0.05); font-size: 0.9em; color: var(--accent);">Выберите чат в поиске</div>
+            <div id="chat-box" class="chat-container"></div>
+            <div class="input-area">
+                <input type="text" id="msg-input" placeholder="Написать сообщение...">
+                <button class="btn-main" style="width:50px;" onclick="sendMessage()">➤</button>
             </div>
         </div>
 
-        <div id="screen-admin" class="screen">
-            <h2>Админ Панель</h2>
-            <div id="admin-stats" style="margin-top:20px; background:var(--panel); padding:20px; border-radius:15px;">
-                <p>Всего пользователей: <b id="stat-total">0</b></p>
+        <div id="screen-profile" class="screen hidden" style="padding:20px;">
+            <h2>Настройки Профиля</h2>
+            <div style="margin-top:20px; background:var(--panel); padding:20px; border-radius:20px;">
+                <p style="color:var(--text-dim)">Ваше Главное Имя (ID):</p>
+                <h2 id="prof-id-display" style="color:var(--primary); margin-bottom:15px;"></h2>
+                <label>Отображаемое имя (Имя 2):</label>
+                <input type="text" id="prof-name2-input" style="width:100%; padding:10px; margin-top:5px; background:var(--bg); border:none; color:white; border-radius:10px;">
+                <label style="display:block; margin-top:15px;">Ссылка на аватарку:</label>
+                <input type="text" id="prof-avatar-url" style="width:100%; padding:10px; margin-top:5px; background:var(--bg); border:none; color:white; border-radius:10px;">
+                <button class="btn-main" style="margin-top:20px;" onclick="saveProfile()">Сохранить настройки</button>
             </div>
         </div>
     </div>
 
     <script>
-        // --- CONFIG ---
         const firebaseConfig = {
             apiKey: "AIzaSyAhneExcv-ElumM5dFvez4_ttk-8H7ci0",
             authDomain: "blik-440b6.firebaseapp.com",
@@ -116,95 +127,122 @@
         const db = firebase.database();
 
         let currentUser = null;
-        const CODE_USER = "21fbhehbebh@934";
-        const CODE_ADMIN = "Admin399u@(_!@#(EJJD";
+        let activeChatID = null;
 
-        // --- ФУНКЦИЯ ПРОВЕРКИ СЕССИИ (ЗАПОМИНАНИЕ) ---
         window.onload = function() {
-            const savedUser = localStorage.getItem('blumtik_session');
-            if (savedUser) {
-                currentUser = JSON.parse(savedUser);
-                startApp();
-            }
+            const saved = localStorage.getItem('blumtik_user');
+            if (saved) { currentUser = JSON.parse(saved); startApp(); }
         };
 
         async function handleAuth() {
             const login = document.getElementById('reg-login').value.trim().toLowerCase();
             const aCode = document.getElementById('access-code').value.trim();
             const pass = document.getElementById('personal-pass').value.trim();
-            const err = document.getElementById('auth-error');
-
-            if (!login || !aCode || !pass) return err.innerText = "Заполни все поля!";
-
-            let isAdminRole = (aCode === CODE_ADMIN);
-            if (!isAdminRole && aCode !== CODE_USER) return err.innerText = "Спец-код неверный!";
+            
+            if (aCode !== "21fbhehbebh@934" && aCode !== "Admin399u@(_!@#(EJJD") return alert("Спец-код неверный!");
 
             const userRef = db.ref('users/' + login);
             const snap = await userRef.once('value');
 
             if (snap.exists()) {
-                if (snap.val().password !== pass) return err.innerText = "Пароль неверный!";
+                if (snap.val().password !== pass) return alert("Неверный пароль!");
                 currentUser = snap.val();
             } else {
-                currentUser = {
-                    name1: login, name2: login, password: pass,
-                    isAdmin: isAdminRole, avatar: "", premium: false,
-                    regTime: Date.now(), lastNameChange: 0
-                };
+                currentUser = { name1: login, name2: login, password: pass, isAdmin: (aCode.includes('Admin')), avatar: "", regDate: Date.now() };
                 await userRef.set(currentUser);
             }
-            
-            // СОХРАНЯЕМ В ПАМЯТЬ БРАУЗЕРА
-            localStorage.setItem('blumtik_session', JSON.stringify(currentUser));
+            localStorage.setItem('blumtik_user', JSON.stringify(currentUser));
             startApp();
         }
 
         function startApp() {
             document.getElementById('auth-screen').classList.add('hidden');
-            document.getElementById('side-name1').innerText = "@" + currentUser.name1;
+            document.getElementById('side-name1').innerText = "ID: " + currentUser.name1;
             document.getElementById('side-name2').innerText = currentUser.name2;
+            document.getElementById('prof-id-display').innerText = currentUser.name1;
             document.getElementById('prof-name2-input').value = currentUser.name2;
-            if (currentUser.isAdmin) document.getElementById('admin-menu-item').classList.remove('hidden');
-            updateAvatarDisplay();
+            document.getElementById('prof-avatar-url').value = currentUser.avatar;
+            updateAvatar();
         }
 
-        function logout() {
-            localStorage.removeItem('blumtik_session');
-            location.reload();
+        async function searchUsers() {
+            const query = document.getElementById('user-search').value.trim().toLowerCase();
+            const resultsBox = document.getElementById('search-results');
+            if (!query) return resultsBox.classList.add('hidden');
+
+            const snap = await db.ref('users').orderByKey().startAt(query).endAt(query + "\uf8ff").once('value');
+            resultsBox.innerHTML = "";
+            resultsBox.classList.remove('hidden');
+
+            snap.forEach(u => {
+                const user = u.val();
+                if (user.name1 === currentUser.name1) return;
+                const div = document.createElement('div');
+                div.className = 'search-item';
+                div.innerHTML = `<span><b>${user.name2}</b> (@${user.name1})</span> <button class="btn-main" style="width:auto; padding:5px 10px;" onclick="openDM('${user.name1}', '${user.name2}')">Написать</button>`;
+                resultsBox.appendChild(div);
+            });
         }
 
-        // --- ОСТАЛЬНАЯ ЛОГИКА ---
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('active');
-            document.querySelector('.sidebar-overlay').classList.toggle('active');
+        function openDM(targetID, targetName) {
+            // Создаем уникальный ID чата (всегда одинаковый для двоих)
+            const chatID = [currentUser.name1, targetID].sort().join("_");
+            activeChatID = "dm_" + chatID;
+            document.getElementById('chat-header-info').innerText = "Чат с: " + targetName + " (@" + targetID + ")";
+            document.getElementById('search-results').classList.add('hidden');
+            loadMessages();
         }
 
-        function showScreen(id) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById('screen-' + id).classList.add('active');
-            toggleSidebar();
+        function sendMessage() {
+            const input = document.getElementById('msg-input');
+            if (input.value.trim() && activeChatID) {
+                db.ref('messages/' + activeChatID).push({
+                    sender: currentUser.name1,
+                    text: input.value.trim(),
+                    time: Date.now()
+                });
+                input.value = "";
+            }
+        }
+
+        function loadMessages() {
+            const box = document.getElementById('chat-box');
+            db.ref('messages/' + activeChatID).on('value', snap => {
+                box.innerHTML = "";
+                snap.forEach(m => {
+                    const data = m.val();
+                    const mine = data.sender === currentUser.name1;
+                    const div = document.createElement('div');
+                    div.className = `message ${mine ? 'mine' : 'theirs'}`;
+                    div.innerHTML = `<div>${data.text}</div>`;
+                    box.appendChild(div);
+                });
+                box.scrollTop = box.scrollHeight;
+            });
         }
 
         async function saveProfile() {
-            const newName2 = document.getElementById('prof-name2-input').value.trim();
-            const newAvatar = document.getElementById('change-avatar-url').value.trim();
-            let updates = { name2: newName2, avatar: newAvatar };
-            
-            await db.ref('users/' + currentUser.name1).update(updates);
-            currentUser = {...currentUser, ...updates};
-            localStorage.setItem('blumtik_session', JSON.stringify(currentUser));
-            alert("Обновлено!");
+            const n2 = document.getElementById('prof-name2-input').value.trim();
+            const av = document.getElementById('prof-avatar-url').value.trim();
+            await db.ref('users/' + currentUser.name1).update({ name2: n2, avatar: av });
+            currentUser.name2 = n2; currentUser.avatar = av;
+            localStorage.setItem('blumtik_user', JSON.stringify(currentUser));
+            alert("Сохранено!");
             startApp();
         }
 
-        function updateAvatarDisplay() {
-            const url = currentUser.avatar;
-            const containers = [document.getElementById('side-avatar'), document.getElementById('prof-avatar-big')];
-            containers.forEach(c => {
-                if (url) c.innerHTML = `<img src="${url}">`;
-                else c.innerHTML = currentUser.name1[0].toUpperCase();
-            });
+        function updateAvatar() {
+            const img = currentUser.avatar ? `<img src="${currentUser.avatar}">` : currentUser.name1[0].toUpperCase();
+            document.getElementById('side-avatar').innerHTML = img;
         }
+
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('active'); document.querySelector('.sidebar-overlay').classList.toggle('active'); }
+        function showScreen(id) { 
+            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden')); 
+            document.getElementById('screen-' + id).classList.remove('hidden'); 
+            toggleSidebar();
+        }
+        function logout() { localStorage.removeItem('blumtik_user'); location.reload(); }
     </script>
 </body>
 </html>
