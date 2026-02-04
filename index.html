@@ -3,107 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BlumTik Messenger</title>
+    <title>BlumTik - Double Security</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
-        :root {
-            --primary: #6c5ce7;
-            --bg-dark: #1e1e2e;
-            --bg-panel: #2d2d44;
-            --text-main: #ffffff;
-            --text-sec: #a0a0a0;
-            --danger: #ff7675;
-            --premium: #fdcb6e;
-        }
-
+        :root { --primary: #6c5ce7; --bg: #1e1e2e; --panel: #2d2d44; --text: #fff; --danger: #ff7675; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background-color: var(--bg-dark); color: var(--text-main); height: 100vh; overflow: hidden; }
+        body { background-color: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }
         .hidden { display: none !important; }
 
-        /* Авторизация */
-        #auth-screen { height: 100%; display: flex; justify-content: center; align-items: center; padding: 20px; }
-        .auth-box { background: var(--bg-panel); padding: 30px; border-radius: 20px; width: 100%; max-width: 350px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .input-group { margin-bottom: 15px; text-align: left; }
-        .input-group label { font-size: 0.8em; color: var(--text-sec); display: block; margin-bottom: 5px; }
-        .input-group input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #444; background: #1e1e2e; color: white; outline: none; }
-        .btn { width: 100%; padding: 12px; border: none; border-radius: 10px; background: var(--primary); color: white; font-weight: bold; cursor: pointer; }
+        /* Окно входа */
+        #auth-screen { height: 100%; display: flex; justify-content: center; align-items: center; padding: 20px; background: radial-gradient(circle at top, #322d5e, #1e1e2e); }
+        .auth-box { background: var(--panel); padding: 30px; border-radius: 20px; width: 100%; max-width: 360px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.4); }
+        .input-group { text-align: left; margin-bottom: 15px; }
+        .input-group label { font-size: 0.75em; color: #a0a0a0; margin-left: 5px; display: block; margin-bottom: 5px; }
+        input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #444; background: #1e1e2e; color: white; outline: none; transition: 0.3s; }
+        input:focus { border-color: var(--primary); }
+        .btn { width: 100%; padding: 13px; border: none; border-radius: 10px; background: var(--primary); color: white; font-weight: bold; cursor: pointer; font-size: 1em; }
 
-        /* Интерфейс чата */
+        /* Чат */
         #app-screen { height: 100%; display: flex; flex-direction: column; }
-        header { padding: 15px; background: var(--bg-panel); display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #444; }
-        .chat-window { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 12px; }
+        header { padding: 15px; background: var(--panel); display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+        #chat-box { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+        .msg { padding: 10px 15px; border-radius: 15px; max-width: 80%; position: relative; line-height: 1.4; }
+        .msg.mine { align-self: flex-end; background: var(--primary); border-bottom-right-radius: 2px; }
+        .msg.theirs { align-self: flex-start; background: var(--panel); border-bottom-left-radius: 2px; }
+        .msg-info { font-size: 0.7em; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
         
-        .message { padding: 10px 15px; border-radius: 15px; max-width: 85%; position: relative; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .message.mine { align-self: flex-end; background: var(--primary); border-bottom-right-radius: 2px; }
-        .message.theirs { align-self: flex-start; background: var(--bg-panel); border-bottom-left-radius: 2px; }
-        
-        .sender-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; gap: 10px; }
-        .sender-name { font-size: 0.75em; font-weight: bold; color: var(--premium); }
-        .del-btn { color: var(--danger); font-size: 0.8em; cursor: pointer; opacity: 0.6; }
-        .del-btn:hover { opacity: 1; }
-
-        .input-area { padding: 15px; background: var(--bg-panel); display: flex; gap: 10px; }
-        .input-area input { flex: 1; padding: 12px; border-radius: 10px; border: none; background: var(--bg-dark); color: white; outline: none; }
-        .send-btn { background: var(--primary); color: white; border: none; width: 45px; border-radius: 10px; cursor: pointer; }
-
-        /* Боковое меню */
-        #sidebar { position: fixed; left: -280px; top: 0; width: 280px; height: 100%; background: var(--bg-panel); transition: 0.3s; z-index: 100; padding: 20px; }
-        #sidebar.active { left: 0; }
-        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; z-index: 90; }
-        .overlay.active { display: block; }
+        .input-area { padding: 15px; background: var(--panel); display: flex; gap: 10px; }
+        .send-btn { background: var(--primary); color: white; border: none; width: 50px; border-radius: 10px; cursor: pointer; font-size: 1.2em; }
     </style>
 </head>
 <body>
 
     <div id="auth-screen">
         <div class="auth-box">
-            <h1 style="color: var(--primary); margin-bottom: 5px;">BlumTik</h1>
-            <p style="font-size: 0.8em; color: gray; margin-bottom: 25px;">Secure Mobile Messenger</p>
+            <h2 style="margin-bottom: 5px; color: var(--primary);">BlumTik</h2>
+            <p style="font-size: 0.8em; color: #a0a0a0; margin-bottom: 20px;">Система двойной защиты</p>
+            
             <div class="input-group">
-                <label>Придумайте Логин</label>
-                <input type="text" id="reg-login" placeholder="Никнейм">
+                <label>Ваш Никнейм</label>
+                <input type="text" id="reg-login" placeholder="Напр. ivan_pro">
             </div>
+
             <div class="input-group">
-                <label>Код-Пароль</label>
-                <input type="password" id="reg-code" placeholder="Ваш секретный код">
+                <label>Спец-код доступа (Админ/Юзер)</label>
+                <input type="password" id="access-code" placeholder="Общий секретный код">
             </div>
-            <button class="btn" onclick="handleAuth()">Войти / Создать</button>
-            <p id="error-text" style="color: var(--danger); font-size: 0.8em; margin-top: 15px;"></p>
+
+            <div class="input-group">
+                <label>Ваш личный пароль аккаунта</label>
+                <input type="password" id="personal-pass" placeholder="Придумайте пароль">
+            </div>
+
+            <button class="btn" onclick="handleAuth()">Войти в BlumTik</button>
+            <p id="error-text" style="color: var(--danger); font-size: 0.8em; margin-top: 15px; min-height: 1em;"></p>
         </div>
     </div>
 
     <div id="app-screen" class="hidden">
-        <div class="overlay" onclick="toggleSidebar()"></div>
-        <div id="sidebar">
-            <h2 id="user-display" style="margin-bottom: 5px;"></h2>
-            <p id="user-handle" style="color: gray; font-size: 0.8em; margin-bottom: 30px;"></p>
-            <hr style="border: 0; border-top: 1px solid #444; margin-bottom: 20px;">
-            <p style="color: var(--text-sec); font-size: 0.9em;">Ваш статус: <span id="status-text">Пользователь</span></p>
-            <button class="btn" onclick="location.reload()" style="background: var(--danger); margin-top: 50px;">Выйти</button>
-        </div>
-
         <header>
-            <i class="fas fa-bars" onclick="toggleSidebar()" style="cursor: pointer; font-size: 1.2em;"></i>
-            <div style="font-weight: bold; letter-spacing: 1px;">BLUMTIK</div>
-            <div style="width: 20px;"></div>
+            <div id="user-display" style="font-weight: bold;"></div>
+            <button onclick="location.reload()" style="background:none; border:none; color:var(--danger); font-weight:bold;">Выход</button>
         </header>
-
-        <div class="chat-window" id="chat-box"></div>
-
+        <div id="chat-box"></div>
         <div class="input-area">
             <input type="text" id="msg-input" placeholder="Введите сообщение...">
-            <button class="send-btn" onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
+            <button class="send-btn" onclick="sendMessage()">➤</button>
         </div>
     </div>
 
     <script>
-        // ТВОЯ КОНФИГУРАЦИЯ (Из скриншотов)
+        // Твои данные Firebase из скриншотов
         const firebaseConfig = {
             apiKey: "AIzaSyAhneExcv-ElumM5dFvez4_ttk-8H7ci0",
             authDomain: "blik-440b6.firebaseapp.com",
@@ -120,61 +94,64 @@
         let currentUser = null;
         let isAdmin = false;
 
-        const ADMIN_CODE = "Admin399u@(_!@#(EJJD"; // Твой админ код
+        // Глобальные спец-коды
+        const GLOBAL_USER_CODE = "21fbhehbebh@934";
+        const GLOBAL_ADMIN_CODE = "Admin399u@(_!@#(EJJD";
 
         async function handleAuth() {
             const login = document.getElementById('reg-login').value.trim().toLowerCase();
-            const code = document.getElementById('reg-code').value.trim();
+            const aCode = document.getElementById('access-code').value.trim();
+            const pPass = document.getElementById('personal-pass').value.trim();
             const err = document.getElementById('error-text');
 
-            if (!login || !code) return err.innerText = "Заполните все поля!";
-            
+            if (!login || !aCode || !pPass) return err.innerText = "Заполните все три поля!";
+
+            // 1. Проверяем спец-код (общий)
+            let currentRoleAdmin = false;
+            if (aCode === GLOBAL_ADMIN_CODE) {
+                currentRoleAdmin = true;
+            } else if (aCode !== GLOBAL_USER_CODE) {
+                return err.innerText = "Неверный спец-код доступа!";
+            }
+
+            // 2. Проверяем личный пароль аккаунта в базе
             const userRef = db.ref('users/' + login);
             const snapshot = await userRef.once('value');
             const userData = snapshot.val();
 
             if (userData) {
-                // Если юзер есть, проверяем пароль
-                if (userData.password === code) {
-                    completeLogin(login, userData.isAdmin);
+                // Аккаунт уже существует - проверяем его личный пароль
+                if (userData.password === pPass) {
+                    enterApp(login, userData.isAdmin);
                 } else {
-                    err.innerText = "Этот логин занят другим паролем!";
+                    err.innerText = "Этот никнейм уже занят другим паролем!";
                 }
             } else {
-                // Регистрация нового
-                const isNewAdmin = (code === ADMIN_CODE);
+                // Регистрация нового аккаунта
                 await userRef.set({
                     username: login,
-                    password: code,
-                    isAdmin: isNewAdmin
+                    password: pPass, // Личный пароль аккаунта
+                    isAdmin: currentRoleAdmin
                 });
-                completeLogin(login, isNewAdmin);
+                enterApp(login, currentRoleAdmin);
             }
         }
 
-        function completeLogin(name, adminStatus) {
+        function enterApp(name, adminStatus) {
             currentUser = name;
             isAdmin = adminStatus;
             document.getElementById('auth-screen').classList.add('hidden');
             document.getElementById('app-screen').classList.remove('hidden');
-            document.getElementById('user-display').innerText = name;
-            document.getElementById('user-handle').innerText = "@" + name;
-            if (isAdmin) document.getElementById('status-text').innerText = "Администратор ★";
+            document.getElementById('user-display').innerText = (isAdmin ? "★ " : "") + name.toUpperCase();
             loadMessages();
-        }
-
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('active');
-            document.querySelector('.overlay').classList.toggle('active');
         }
 
         function sendMessage() {
             const input = document.getElementById('msg-input');
-            const text = input.value.trim();
-            if (text) {
+            if (input.value.trim()) {
                 db.ref('messages').push({
                     sender: currentUser,
-                    text: text,
+                    text: input.value.trim(),
                     isAdmin: isAdmin,
                     time: Date.now()
                 });
@@ -182,40 +159,36 @@
             }
         }
 
-        function deleteMessage(msgId) {
-            if (isAdmin && confirm("Удалить это сообщение?")) {
-                db.ref('messages/' + msgId).remove();
-            }
+        function deleteMsg(id) {
+            if (isAdmin && confirm("Удалить сообщение?")) db.ref('messages/' + id).remove();
         }
 
         function loadMessages() {
-            const chatBox = document.getElementById('chat-box');
-            db.ref('messages').limitToLast(100).on('value', (snapshot) => {
-                chatBox.innerHTML = "";
-                snapshot.forEach((child) => {
+            const box = document.getElementById('chat-box');
+            db.ref('messages').limitToLast(100).on('value', (snap) => {
+                box.innerHTML = "";
+                snap.forEach((child) => {
                     const data = child.val();
                     const id = child.key;
-                    const isMine = data.sender === currentUser;
-                    
+                    const mine = data.sender === currentUser;
                     const div = document.createElement('div');
-                    div.className = `message ${isMine ? 'mine' : 'theirs'}`;
-                    
+                    div.className = `msg ${mine ? 'mine' : 'theirs'}`;
                     div.innerHTML = `
-                        <div class="sender-info">
-                            <span class="sender-name">${data.isAdmin ? '★ ' : ''}${data.sender}</span>
-                            ${isAdmin ? `<i class="fas fa-trash del-btn" onclick="deleteMessage('${id}')"></i>` : ''}
+                        <div class="msg-info">
+                            <span style="font-weight:bold; color: ${data.isAdmin ? 'var(--premium)' : 'inherit'}">
+                                ${data.isAdmin ? '★' : ''} ${data.sender}
+                            </span>
+                            ${isAdmin ? `<i class="fas fa-trash" style="cursor:pointer; opacity:0.5" onclick="deleteMsg('${id}')"></i>` : ''}
                         </div>
-                        <div class="text">${data.text}</div>
+                        <div>${data.text}</div>
                     `;
-                    chatBox.appendChild(div);
+                    box.appendChild(div);
                 });
-                chatBox.scrollTop = chatBox.scrollHeight;
+                box.scrollTop = box.scrollHeight;
             });
         }
 
-        document.getElementById('msg-input').addEventListener("keypress", (e) => {
-            if (e.key === "Enter") sendMessage();
-        });
+        document.getElementById('msg-input').addEventListener("keypress", (e) => { if(e.key === "Enter") sendMessage(); });
     </script>
 </body>
 </html>
