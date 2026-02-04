@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BlumTik Ultimate</title>
+    <title>BlumTik Ultimate - Persistent</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
@@ -14,48 +14,34 @@
             --primary: #6c5ce7; --bg: #13131d; --panel: #1e1e2e;
             --text: #ffffff; --text-dim: #a0a0a0; --accent: #fdcb6e; --danger: #ff7675;
         }
-
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         body { background-color: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; }
         .hidden { display: none !important; }
 
-        /* --- AUTH --- */
+        /* AUTH SCREEN */
         #auth-screen { position: fixed; inset: 0; background: var(--bg); z-index: 2000; display: flex; justify-content: center; align-items: center; padding: 20px; }
         .auth-box { background: var(--panel); padding: 30px; border-radius: 24px; width: 100%; max-width: 400px; box-shadow: 0 20px 60px rgba(0,0,0,0.6); text-align: center; }
         .auth-box input { width: 100%; padding: 14px; margin: 10px 0; border-radius: 12px; border: 1px solid #333; background: #13131d; color: white; outline: none; }
-        .btn-main { width: 100%; padding: 15px; background: var(--primary); border: none; border-radius: 12px; color: white; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn-main { width: 100%; padding: 15px; background: var(--primary); border: none; border-radius: 12px; color: white; font-weight: bold; cursor: pointer; }
 
-        /* --- SIDEBAR --- */
-        #sidebar { position: fixed; left: -300px; top: 0; width: 280px; height: 100%; background: var(--panel); z-index: 1500; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); padding: 25px; box-shadow: 10px 0 30px rgba(0,0,0,0.5); }
+        /* SIDEBAR */
+        #sidebar { position: fixed; left: -300px; top: 0; width: 280px; height: 100%; background: var(--panel); z-index: 1500; transition: 0.4s; padding: 25px; box-shadow: 10px 0 30px rgba(0,0,0,0.5); }
         #sidebar.active { left: 0; }
         .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1400; display: none; }
         .sidebar-overlay.active { display: block; }
-        
         .profile-card { text-align: center; margin-bottom: 30px; }
         .avatar-circle { width: 80px; height: 80px; border-radius: 50%; background: var(--primary); margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; font-size: 2em; overflow: hidden; border: 3px solid var(--primary); }
         .avatar-circle img { width: 100%; height: 100%; object-fit: cover; }
-        
-        .menu-item { padding: 15px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 15px; margin-bottom: 5px; transition: 0.2s; }
+        .menu-item { padding: 15px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 15px; margin-bottom: 5px; }
         .menu-item:hover { background: rgba(255,255,255,0.05); }
-        .menu-item i { width: 20px; color: var(--primary); }
 
-        /* --- MAIN CONTENT --- */
+        /* MAIN APP */
         #main-app { flex: 1; display: flex; flex-direction: column; }
         header { padding: 15px 20px; background: var(--panel); display: flex; align-items: center; gap: 20px; border-bottom: 1px solid #333; }
-        
         .search-bar { flex: 1; position: relative; }
         .search-bar input { width: 100%; padding: 10px 15px 10px 40px; border-radius: 20px; border: none; background: #13131d; color: white; }
         .search-bar i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--text-dim); }
-
-        .content-body { flex: 1; overflow-y: auto; padding: 10px; }
-        .chat-item { display: flex; align-items: center; padding: 15px; border-radius: 15px; cursor: pointer; margin-bottom: 5px; }
-        .chat-item:hover { background: var(--panel); }
-        
-        /* --- FLOAT BUTTON --- */
-        .fab { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5em; box-shadow: 0 10px 25px rgba(108, 92, 231, 0.4); cursor: pointer; z-index: 100; }
-
-        /* --- SCREENS --- */
-        .screen { display: none; flex-direction: column; height: 100%; padding: 20px; }
+        .screen { display: none; flex-direction: column; height: 100%; padding: 20px; overflow-y: auto; }
         .screen.active { display: flex; }
     </style>
 </head>
@@ -64,10 +50,10 @@
     <div id="auth-screen">
         <div class="auth-box">
             <h1 style="color:var(--primary); margin-bottom:20px;">BlumTik</h1>
-            <input type="text" id="reg-login" placeholder="Придумайте Логин (имя 1)">
-            <input type="password" id="access-code" placeholder="Спец-код (21fb... или Admin...)">
+            <input type="text" id="reg-login" placeholder="Логин (имя 1)">
+            <input type="password" id="access-code" placeholder="Спец-код">
             <input type="password" id="personal-pass" placeholder="Личный пароль">
-            <button class="btn-main" onclick="handleAuth()">Зарегистрироваться / Войти</button>
+            <button class="btn-main" onclick="handleAuth()">Войти</button>
             <p id="auth-error" style="color:var(--danger); margin-top:15px; font-size:0.8em;"></p>
         </div>
     </div>
@@ -81,54 +67,36 @@
         </div>
         <div class="menu-item" onclick="showScreen('chats')"><i class="fas fa-comment"></i> Чаты</div>
         <div class="menu-item" onclick="showScreen('profile')"><i class="fas fa-user-circle"></i> Профиль</div>
-        <div class="menu-item" onclick="showScreen('settings')"><i class="fas fa-cog"></i> Настройки</div>
         <div id="admin-menu-item" class="menu-item hidden" onclick="showScreen('admin')"><i class="fas fa-user-shield"></i> Админ Панель</div>
-        <div class="menu-item" style="margin-top:50px; color:var(--danger)" onclick="location.reload()"><i class="fas fa-sign-out-alt"></i> Выход</div>
+        <div class="menu-item" style="margin-top:50px; color:var(--danger)" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Выйти из аккаунта</div>
     </div>
 
     <div id="main-app">
         <header>
             <i class="fas fa-bars" style="cursor:pointer; font-size:1.2em;" onclick="toggleSidebar()"></i>
-            <div class="search-bar">
-                <i class="fas fa-search"></i>
-                <input type="text" placeholder="Поиск людей или каналов..." id="search-input">
-            </div>
+            <div class="search-bar"><i class="fas fa-search"></i><input type="text" placeholder="Поиск..." id="search-input"></div>
         </header>
 
         <div id="screen-chats" class="screen active">
-            <div id="chat-list" class="content-body">
-                </div>
-            <div class="fab" onclick="createNewGroup()"><i class="fas fa-plus"></i></div>
+            <h2>Ваши чаты</h2>
+            <div id="chat-list" style="margin-top:20px;"></div>
         </div>
 
         <div id="screen-profile" class="screen">
-            <h2>Мой профиль</h2>
+            <h2>Настройки профиля</h2>
             <div class="profile-card" style="margin-top:20px;">
                 <div class="avatar-circle" id="prof-avatar-big" style="width:120px; height:120px;">B</div>
-                <input type="text" id="change-avatar-url" placeholder="URL аватарки или стикера" style="width:100%; padding:10px; margin:10px 0; background:var(--panel); border:none; color:white; border-radius:10px;">
-                <p>Имя 1: <b id="prof-name1"></b> (нельзя изменить)</p>
-                <div style="margin-top:15px;">
-                    <label>Имя 2 (можно менять раз в 3 дня):</label>
-                    <input type="text" id="prof-name2-input" style="width:100%; padding:10px; margin-top:5px; background:var(--panel); border:none; color:white; border-radius:10px;">
-                </div>
-                <button class="btn-main" style="margin-top:20px;" onclick="saveProfile()">Сохранить изменения</button>
+                <input type="text" id="change-avatar-url" placeholder="URL аватарки" style="width:100%; padding:10px; margin:10px 0; background:var(--panel); border:none; color:white; border-radius:10px;">
+                <input type="text" id="prof-name2-input" placeholder="Имя 2" style="width:100%; padding:10px; background:var(--panel); border:none; color:white; border-radius:10px;">
+                <button class="btn-main" style="margin-top:20px;" onclick="saveProfile()">Сохранить</button>
             </div>
         </div>
 
         <div id="screen-admin" class="screen">
             <h2>Админ Панель</h2>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:20px;">
-                <div style="background:var(--panel); padding:15px; border-radius:15px;">
-                    <p style="color:var(--text-dim)">Зарегистрировано</p>
-                    <h1 id="stat-total">0</h1>
-                </div>
-                <div style="background:var(--panel); padding:15px; border-radius:15px;">
-                    <p style="color:var(--text-dim)">Онлайн</p>
-                    <h1 id="stat-online">1</h1>
-                </div>
+            <div id="admin-stats" style="margin-top:20px; background:var(--panel); padding:20px; border-radius:15px;">
+                <p>Всего пользователей: <b id="stat-total">0</b></p>
             </div>
-            <div id="user-admin-list" class="content-body" style="margin-top:20px;">
-                </div>
         </div>
     </div>
 
@@ -151,7 +119,15 @@
         const CODE_USER = "21fbhehbebh@934";
         const CODE_ADMIN = "Admin399u@(_!@#(EJJD";
 
-        // --- AUTH ---
+        // --- ФУНКЦИЯ ПРОВЕРКИ СЕССИИ (ЗАПОМИНАНИЕ) ---
+        window.onload = function() {
+            const savedUser = localStorage.getItem('blumtik_session');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                startApp();
+            }
+        };
+
         async function handleAuth() {
             const login = document.getElementById('reg-login').value.trim().toLowerCase();
             const aCode = document.getElementById('access-code').value.trim();
@@ -171,18 +147,15 @@
                 currentUser = snap.val();
             } else {
                 currentUser = {
-                    name1: login,
-                    name2: login,
-                    password: pass,
-                    isAdmin: isAdminRole,
-                    avatar: "",
-                    premium: false,
-                    regTime: Date.now(),
-                    lastNameChange: 0
+                    name1: login, name2: login, password: pass,
+                    isAdmin: isAdminRole, avatar: "", premium: false,
+                    regTime: Date.now(), lastNameChange: 0
                 };
                 await userRef.set(currentUser);
             }
             
+            // СОХРАНЯЕМ В ПАМЯТЬ БРАУЗЕРА
+            localStorage.setItem('blumtik_session', JSON.stringify(currentUser));
             startApp();
         }
 
@@ -190,54 +163,38 @@
             document.getElementById('auth-screen').classList.add('hidden');
             document.getElementById('side-name1').innerText = "@" + currentUser.name1;
             document.getElementById('side-name2').innerText = currentUser.name2;
-            document.getElementById('prof-name1').innerText = currentUser.name1;
             document.getElementById('prof-name2-input').value = currentUser.name2;
-            
-            if (currentUser.isAdmin) {
-                document.getElementById('admin-menu-item').classList.remove('hidden');
-                loadAdminStats();
-            }
+            if (currentUser.isAdmin) document.getElementById('admin-menu-item').classList.remove('hidden');
             updateAvatarDisplay();
         }
 
-        // --- SIDEBAR ---
+        function logout() {
+            localStorage.removeItem('blumtik_session');
+            location.reload();
+        }
+
+        // --- ОСТАЛЬНАЯ ЛОГИКА ---
         function toggleSidebar() {
             document.getElementById('sidebar').classList.toggle('active');
             document.querySelector('.sidebar-overlay').classList.toggle('active');
         }
 
-        function showScreen(screenId) {
+        function showScreen(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById('screen-' + screenId).classList.add('active');
+            document.getElementById('screen-' + id).classList.add('active');
             toggleSidebar();
         }
 
-        // --- PROFILE ---
         async function saveProfile() {
             const newName2 = document.getElementById('prof-name2-input').value.trim();
             const newAvatar = document.getElementById('change-avatar-url').value.trim();
-            const now = Date.now();
-
-            let updates = {};
-            if (newAvatar !== currentUser.avatar) updates.avatar = newAvatar;
+            let updates = { name2: newName2, avatar: newAvatar };
             
-            // Проверка на 3 дня для смены имени
-            if (newName2 !== currentUser.name2) {
-                const daysDiff = (now - currentUser.lastNameChange) / (1000 * 60 * 60 * 24);
-                if (daysDiff < 3 && !currentUser.isAdmin) {
-                    alert("Имя можно менять раз в 3 дня!");
-                } else {
-                    updates.name2 = newName2;
-                    updates.lastNameChange = now;
-                }
-            }
-
-            if (Object.keys(updates).length > 0) {
-                await db.ref('users/' + currentUser.name1).update(updates);
-                currentUser = {...currentUser, ...updates};
-                alert("Данные сохранены!");
-                startApp();
-            }
+            await db.ref('users/' + currentUser.name1).update(updates);
+            currentUser = {...currentUser, ...updates};
+            localStorage.setItem('blumtik_session', JSON.stringify(currentUser));
+            alert("Обновлено!");
+            startApp();
         }
 
         function updateAvatarDisplay() {
@@ -247,44 +204,6 @@
                 if (url) c.innerHTML = `<img src="${url}">`;
                 else c.innerHTML = currentUser.name1[0].toUpperCase();
             });
-        }
-
-        // --- ADMIN ---
-        function loadAdminStats() {
-            db.ref('users').on('value', (snap) => {
-                const users = snap.val();
-                const total = Object.keys(users).length;
-                document.getElementById('stat-total').innerText = total;
-                
-                const list = document.getElementById('user-admin-list');
-                list.innerHTML = "<h4>Список пользователей:</h4>";
-                
-                snap.forEach(u => {
-                    const data = u.val();
-                    const date = new Date(data.regTime).toLocaleDateString();
-                    const item = document.createElement('div');
-                    item.className = "chat-item";
-                    item.innerHTML = `
-                        <div class="avatar-circle" style="width:40px; height:40px; font-size:1em;">${data.name1[0].toUpperCase()}</div>
-                        <div style="margin-left:15px; flex:1">
-                            <div>${data.name2} ${data.premium ? '⭐' : ''}</div>
-                            <div style="font-size:0.7em; color:gray">Зарегистрирован: ${date}</div>
-                        </div>
-                        <button onclick="togglePremium('${data.name1}', ${data.premium})" style="padding:5px; font-size:0.7em;">Premium</button>
-                    `;
-                    list.appendChild(item);
-                });
-            });
-        }
-
-        async function togglePremium(targetLogin, currentStatus) {
-            await db.ref('users/' + targetLogin).update({ premium: !currentStatus });
-            alert("Статус Premium изменен!");
-        }
-
-        function createNewGroup() {
-            const name = prompt("Введите название группы или канала:");
-            if (name) alert("Группа '" + name + "' создана!");
         }
     </script>
 </body>
