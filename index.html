@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BlumTik - Final Fixed</title>
+    <title>BlumTik - Admin Control</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
@@ -15,133 +15,108 @@
         body { background-color: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }
         .hidden { display: none !important; }
 
-        /* ЭКРАН ПРИВЕТСТВИЯ */
-        #splash-screen { position: fixed; inset: 0; background: var(--bg); z-index: 5000; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
-        .splash-btns { display: flex; flex-direction: column; gap: 15px; width: 260px; margin-top: 30px; }
-        
-        /* ОКНА АВТОРИЗАЦИИ */
-        #auth-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 6000; display: flex; justify-content: center; align-items: center; }
-        .auth-box { background: var(--panel); padding: 30px; border-radius: 24px; width: 90%; max-width: 380px; text-align: center; border: 1px solid #333; }
-        input { width: 100%; padding: 14px; margin: 8px 0; border-radius: 12px; border: 1px solid #333; background: #0b0b12; color: white; outline: none; }
-        .btn { width: 100%; padding: 15px; background: var(--primary); border: none; border-radius: 12px; color: white; font-weight: bold; cursor: pointer; }
+        /* SPLASH */
+        #splash { position: fixed; inset: 0; background: var(--bg); z-index: 5000; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .btn { width: 100%; padding: 15px; background: var(--primary); border: none; border-radius: 12px; color: white; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
 
-        /* БОКОВАЯ ПАНЕЛЬ */
-        #sidebar { position: fixed; left: -300px; top: 0; width: 280px; height: 100%; background: var(--panel); z-index: 4000; transition: 0.3s; padding: 25px; border-right: 1px solid #222; }
-        #sidebar.active { left: 0 !important; }
-        .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 3900; display: none; }
-        .sidebar-overlay.active { display: block; }
+        /* AUTH */
+        #auth-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 6000; display: flex; justify-content: center; align-items: center; }
+        .auth-box { background: var(--panel); padding: 30px; border-radius: 24px; width: 90%; max-width: 380px; text-align: center; }
+        input { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #333; background: #0b0b12; color: white; outline: none; }
 
-        /* ГЛАВНЫЙ КОНТЕЙНЕР */
-        #main-container { display: flex; flex-direction: column; height: 100vh; width: 100%; }
-        header { padding: 15px 20px; background: var(--panel); display: flex; align-items: center; gap: 20px; border-bottom: 1px solid #222; }
-        
-        /* ЧАТЫ И ОКНА */
-        #chat-list { flex: 1; overflow-y: auto; padding: 10px; }
-        .chat-row { display: flex; align-items: center; padding: 15px; border-radius: 15px; cursor: pointer; margin-bottom: 5px; background: rgba(255,255,255,0.02); }
-        
-        #chat-window { position: fixed; inset: 0; background: var(--bg); z-index: 3000; display: flex; flex-direction: column; transform: translateX(100%); transition: 0.3s; }
-        #chat-window.active { transform: translateX(0); }
+        /* MAIN */
+        #app { display: flex; flex-direction: column; height: 100vh; }
+        header { padding: 15px; background: var(--panel); display: flex; align-items: center; gap: 15px; border-bottom: 1px solid #222; }
+        #search-in { flex: 1; padding: 10px; border-radius: 20px; border: none; background: #0b0b12; color: white; }
 
-        .screen { position: fixed; inset: 0; background: var(--bg); z-index: 3500; padding: 25px; display: none; flex-direction: column; }
-        .screen.active { display: flex; }
+        /* SIDEBAR */
+        #sidebar { position: fixed; left: -300px; top: 0; width: 280px; height: 100%; background: var(--panel); z-index: 4000; transition: 0.3s; padding: 25px; }
+        #sidebar.active { left: 0; }
+        .side-item { padding: 12px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 12px; }
 
-        .avatar-main { width: 80px; height: 80px; border-radius: 50%; background: var(--primary); margin: 0 auto 10px; overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 2em; border: 2px solid var(--primary); cursor: pointer; }
-        .avatar-main img { width: 100%; height: 100%; object-fit: cover; }
-        
-        .side-item { padding: 15px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 15px; margin-bottom: 5px; }
-        .side-item:hover { background: rgba(255,255,255,0.05); }
-
-        #messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
-        .msg { padding: 10px 15px; border-radius: 18px; max-width: 80%; }
+        /* CHAT WINDOW */
+        #chat-ui { position: fixed; inset: 0; background: var(--bg); z-index: 3000; display: flex; flex-direction: column; transform: translateX(100%); transition: 0.3s; }
+        #chat-ui.active { transform: translateX(0); }
+        #msgs { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+        .msg { padding: 10px 15px; border-radius: 15px; max-width: 80%; }
         .msg.mine { align-self: flex-end; background: var(--primary); }
         .msg.theirs { align-self: flex-start; background: var(--panel); }
 
-        .input-area { padding: 15px; background: var(--panel); display: flex; align-items: center; gap: 10px; }
+        /* SCREENS */
+        .screen { position: fixed; inset: 0; background: var(--bg); z-index: 3500; padding: 20px; display: none; flex-direction: column; }
+        .screen.active { display: flex; }
+        .admin-user-card { background: var(--panel); padding: 15px; border-radius: 12px; margin-bottom: 10px; border: 1px solid #333; }
     </style>
 </head>
 <body>
 
-    <div id="splash-screen">
-        <h1 style="font-size:3.5em; color:var(--primary); font-weight:900;">BlumTik</h1>
-        <div class="splash-btns">
-            <button class="btn" onclick="openAuthWindow('login')">Войти</button>
-            <button class="btn" style="background:#222" onclick="openAuthWindow('reg')">Зарегистрироваться</button>
+    <div id="splash">
+        <h1 style="font-size:3em; color:var(--primary)">BlumTik</h1>
+        <div style="width:260px; margin-top:20px;">
+            <button class="btn" onclick="openAuth('login')">Войти</button>
+            <button class="btn" style="background:#222" onclick="openAuth('reg')">Зарегистрироваться</button>
         </div>
     </div>
 
-    <div id="auth-overlay" class="hidden">
+    <div id="auth-modal" class="hidden">
         <div class="auth-box">
             <h2 id="auth-title">Вход</h2>
-            <input type="text" id="in-login" placeholder="Логин (имя 1)">
-            <input type="password" id="in-pass" placeholder="Пароль">
-            <div id="reg-fields" class="hidden">
-                <input type="password" id="in-code" placeholder="Спец-код доступа">
-            </div>
-            <button class="btn" style="margin-top:10px" onclick="processAuth()">Подтвердить</button>
-            <button class="btn" style="background:none; color:gray; margin-top:5px" onclick="closeAuthWindow()">Отмена</button>
+            <input type="text" id="a-log" placeholder="Ваш ID">
+            <input type="password" id="a-pas" placeholder="Пароль">
+            <input type="password" id="a-cod" class="hidden" placeholder="Спец-код">
+            <button class="btn" style="margin-top:15px" onclick="handleAuth()">Продолжить</button>
+            <button class="btn" style="background:none; color:gray" onclick="closeAuth()">Отмена</button>
         </div>
     </div>
 
-    <div id="main-container" class="hidden">
+    <div id="app" class="hidden">
         <header>
-            <i class="fas fa-bars" style="cursor:pointer" onclick="toggleSidebar(true)"></i>
-            <div style="font-weight:bold">BlumTik</div>
+            <i class="fas fa-bars" onclick="toggleMenu(true)"></i>
+            <input type="text" id="search-in" placeholder="Поиск по ID..." oninput="searchUser()">
         </header>
-        <div id="chat-list"></div>
+        <div id="search-res" style="padding:10px;"></div>
+        <div id="chat-list-history" style="flex:1"></div>
     </div>
 
-    <div class="sidebar-overlay" onclick="toggleSidebar(false)"></div>
     <div id="sidebar">
-        <div class="avatar-main" id="side-avatar">B</div>
-        <h3 id="side-name2" style="text-align:center">Имя 2</h3>
-        <p id="side-name1" style="text-align:center; color:gray; font-size:0.8em; margin-bottom:25px;">@id</p>
-        
-        <div class="side-item" onclick="toggleSidebar(false); closeScreens();"><i class="fas fa-comment"></i> Чаты</div>
-        <div class="side-item" onclick="openScreen('profile')"><i class="fas fa-user-circle"></i> Профиль</div>
-        <div class="side-item" onclick="openScreen('settings')"><i class="fas fa-cog"></i> Настройки</div>
-        <div class="side-item hidden" id="adm-btn" onclick="openScreen('admin')"><i class="fas fa-user-shield"></i> Админка</div>
-        <div class="side-item" style="color:var(--danger); margin-top:30px;" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Выйти</div>
+        <div id="my-av-box" style="width:80px; height:80px; background:var(--primary); border-radius:50%; margin:0 auto 10px; display:flex; align-items:center; justify-content:center; font-size:2em; overflow:hidden;">B</div>
+        <h3 id="my-n2" style="text-align:center">Имя</h3>
+        <p id="my-n1" style="text-align:center; color:gray; font-size:0.8em; margin-bottom:20px;">@id</p>
+        <div class="side-item" onclick="openScr('profile')"><i class="fas fa-user"></i> Профиль</div>
+        <div class="side-item hidden" id="admin-link" onclick="openScr('admin')"><i class="fas fa-user-shield"></i> Админ-панель</div>
+        <div class="side-item" style="color:var(--danger); margin-top:30px;" onclick="logout()">Выход</div>
     </div>
 
-    <div id="chat-window">
+    <div id="chat-ui">
         <header>
             <i class="fas fa-arrow-left" onclick="closeChat()"></i>
-            <div id="chat-target-title" style="font-weight:bold">Чат</div>
+            <b id="chat-name">Чат</b>
         </header>
-        <div id="messages"></div>
-        <div class="input-area">
-            <i class="fas fa-circle" style="color:red; cursor:pointer"></i>
-            <input type="text" id="m-input" placeholder="Написать..." style="flex:1; background:#0b0b12; border:1px solid #333; padding:10px; border-radius:10px; color:white;">
-            <i class="fas fa-microphone" style="color:gray; cursor:pointer"></i>
-            <i class="fas fa-paper-plane" style="color:var(--primary); cursor:pointer" onclick="sendMsg()"></i>
+        <div id="msgs"></div>
+        <div style="padding:15px; background:var(--panel); display:flex; gap:10px;">
+            <input type="text" id="msg-input" placeholder="Сообщение..." style="flex:1; background:#0b0b12; border:1px solid #333; color:white; padding:10px; border-radius:10px;">
+            <button onclick="sendMessageNow()" style="background:none; border:none; color:var(--primary); font-size:1.5em;"><i class="fas fa-paper-plane"></i></button>
         </div>
     </div>
 
     <div id="scr-profile" class="screen">
-        <i class="fas fa-arrow-left" onclick="closeScreens()"></i>
-        <h2 style="margin:20px 0">Мой Профиль</h2>
-        <div class="avatar-main" style="width:100px; height:100px" onclick="document.getElementById('f-input').click()" id="p-avatar">B</div>
-        <input type="file" id="f-input" class="hidden" accept="image/*" onchange="upPhoto(this)">
-        <label>Изменить никнейм (Имя 2):</label>
-        <input type="text" id="p-name2">
-        <button class="btn" onclick="saveProf()">Сохранить изменения</button>
-    </div>
-
-    <div id="scr-settings" class="screen">
-        <i class="fas fa-arrow-left" onclick="closeScreens()"></i>
-        <h2 style="margin:20px 0">Настройки</h2>
-        <div class="side-item">Тема: Темная (по умолчанию)</div>
-        <div class="side-item">Уведомления: Включены</div>
+        <i class="fas fa-arrow-left" onclick="closeScrs()"></i>
+        <h2>Профиль</h2>
+        <div style="text-align:center; margin-top:20px;">
+            <div id="p-av" style="width:100px; height:100px; background:var(--primary); border-radius:50%; margin:0 auto; cursor:pointer; overflow:hidden; display:flex; align-items:center; justify-content:center; font-size:2em;" onclick="document.getElementById('f-up').click()">B</div>
+            <input type="file" id="f-up" class="hidden" accept="image/*" onchange="uploadAv(this)">
+            <input type="text" id="p-n2-in" style="margin-top:20px" placeholder="Новое имя">
+            <button class="btn" onclick="saveProf()">Сохранить</button>
+        </div>
     </div>
 
     <div id="scr-admin" class="screen">
-        <i class="fas fa-arrow-left" onclick="closeScreens()"></i>
-        <h2 style="margin:20px 0">Админ-панель</h2>
-        <div id="adm-users"></div>
+        <i class="fas fa-arrow-left" onclick="closeScrs()"></i>
+        <h2>Админ-панель</h2>
+        <div id="admin-users" style="margin-top:20px; overflow-y:auto;"></div>
     </div>
 
     <script>
-        // ИНИЦИАЛИЗАЦИЯ
         const firebaseConfig = {
             apiKey: "AIzaSyAhneExcv-ElumM5dFvez4_ttk-8H7ci0",
             authDomain: "blik-440b6.firebaseapp.com",
@@ -154,167 +129,153 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        let user = null;
+        let me = null;
         let activeChat = null;
-        let authMode = 'login';
+        let isSystemChat = false;
 
         window.onload = () => {
-            const saved = localStorage.getItem('bt_user_v6');
-            if (saved) {
-                user = JSON.parse(saved);
-                launchApp();
-            }
+            const saved = localStorage.getItem('bt_v8');
+            if(saved) { me = JSON.parse(saved); launch(); }
         };
 
-        // КНОПКИ ВХОДА/РЕГИСТРАЦИИ
-        function openAuthWindow(m) {
-            authMode = m;
-            document.getElementById('auth-overlay').classList.remove('hidden');
+        function openAuth(m) {
+            document.getElementById('auth-modal').classList.remove('hidden');
             document.getElementById('auth-title').innerText = m === 'login' ? 'Вход' : 'Регистрация';
-            document.getElementById('reg-fields').classList.toggle('hidden', m === 'login');
+            document.getElementById('a-cod').className = m === 'reg' ? '' : 'hidden';
+            window.authMode = m;
         }
 
-        function closeAuthWindow() {
-            document.getElementById('auth-overlay').classList.add('hidden');
-        }
+        function closeAuth() { document.getElementById('auth-modal').classList.add('hidden'); }
 
-        async function processAuth() {
-            const log = document.getElementById('in-login').value.trim().toLowerCase();
-            const pas = document.getElementById('in-pass').value.trim();
-            const cod = document.getElementById('in-code').value.trim();
+        async function handleAuth() {
+            const log = document.getElementById('a-log').value.trim().toLowerCase();
+            const pas = document.getElementById('a-pas').value.trim();
+            const cod = document.getElementById('a-cod').value.trim();
+            if(!log || !pas) return alert("Заполни всё!");
 
-            if (!log || !pas) return alert("Заполни поля!");
-
-            if (authMode === 'reg') {
-                if (cod !== "21fbhehbebh@934" && cod !== "Admin399u@(_!@#(EJJD") return alert("Код неверный");
-                const snap = await db.ref('users/' + log).once('value');
-                if (snap.exists()) return alert("Логин занят");
-                user = { name1: log, name2: log, password: pas, isAdmin: cod.includes('Admin'), avatar: "" };
-                await db.ref('users/' + log).set(user);
-                await db.ref('messages/system_' + log).push({ sender: 'BlumTik ✅', text: 'Добро пожаловать!' });
+            if(window.authMode === 'reg') {
+                if(cod !== "21fbhehbebh@934" && cod !== "Admin399u@(_!@#(EJJD") return alert("Код!");
+                me = { name1: log, name2: log, password: pas, isAdmin: cod.includes('Admin'), avatar: "" };
+                await db.ref('users/' + log).set(me);
+                await db.ref('messages/system_' + log).push({ sender: 'BlumTik ✅', text: 'Добро пожаловать в мессенджер!' });
             } else {
-                const snap = await db.ref('users/' + log).once('value');
-                if (!snap.exists() || snap.val().password !== pas) return alert("Ошибка входа!");
-                user = snap.val();
+                const s = await db.ref('users/' + log).once('value');
+                if(!s.exists() || s.val().password !== pas) return alert("Ошибка!");
+                me = s.val();
             }
-
-            localStorage.setItem('bt_user_v6', JSON.stringify(user));
+            localStorage.setItem('bt_v8', JSON.stringify(me));
             location.reload();
         }
 
-        // РАБОТА ПРИЛОЖЕНИЯ
-        function launchApp() {
-            document.getElementById('splash-screen').classList.add('hidden');
-            document.getElementById('main-container').classList.remove('hidden');
-            document.getElementById('side-name1').innerText = "@" + user.name1;
-            document.getElementById('side-name2').innerText = user.name2;
-            document.getElementById('p-name2').value = user.name2;
-            
-            if (user.isAdmin) {
-                document.getElementById('adm-btn').classList.remove('hidden');
+        function launch() {
+            document.getElementById('splash').classList.add('hidden');
+            document.getElementById('app').classList.remove('hidden');
+            document.getElementById('my-n1').innerText = "@" + me.name1;
+            document.getElementById('my-n2').innerText = me.name2;
+            if(me.isAdmin) {
+                document.getElementById('admin-link').classList.remove('hidden');
                 loadAdmin();
             }
-            updateAvatars();
-            loadChats();
+            updateAvUI();
         }
 
-        function loadChats() {
-            const list = document.getElementById('chat-list');
-            list.innerHTML = `
-                <div class="chat-row" onclick="openDialog('system_${user.name1}', 'BlumTik ✅')">
-                    <div class="avatar-main" style="width:45px; height:45px; margin:0 15px 0 0; background:#1da1f2; font-size:1.2em;">B</div>
-                    <div><b>BlumTik ✅</b><br><small style="color:gray">Официальный чат</small></div>
-                </div>
-            `;
+        async function searchUser() {
+            const q = document.getElementById('search-in').value.trim().toLowerCase();
+            const res = document.getElementById('search-res');
+            if(!q) return res.innerHTML = "";
+            const s = await db.ref('users/' + q).once('value');
+            if(s.exists() && q !== me.name1) {
+                const u = s.val();
+                res.innerHTML = `<div class="side-item" onclick="startChat('${u.name1}', '${u.name2}')">
+                    <div style="width:40px; height:40px; background:var(--primary); border-radius:50%; display:flex; align-items:center; justify-content:center;">${u.name1[0].toUpperCase()}</div>
+                    <b>${u.name2} (@${u.name1})</b>
+                </div>`;
+            } else res.innerHTML = "Никого не нашли...";
         }
 
-        function openDialog(id, name) {
-            activeChat = id;
-            document.getElementById('chat-target-title').innerText = name;
-            document.getElementById('chat-window').classList.add('active');
-            db.ref('messages/' + id).on('value', snap => {
-                const box = document.getElementById('messages');
+        function startChat(id, name, isSys = false) {
+            isSystemChat = isSys;
+            activeChat = isSys ? id : [me.name1, id].sort().join("_");
+            document.getElementById('chat-name').innerText = name;
+            document.getElementById('chat-ui').classList.add('active');
+            
+            db.ref('messages/' + activeChat).off();
+            db.ref('messages/' + activeChat).on('value', snap => {
+                const box = document.getElementById('msgs');
                 box.innerHTML = "";
                 snap.forEach(m => {
                     const d = m.val();
-                    const div = document.createElement('div');
-                    div.className = `msg ${d.sender === user.name1 ? 'mine' : 'theirs'}`;
-                    div.innerText = d.text;
-                    box.appendChild(div);
+                    const isMine = d.sender === me.name1 || (isSystemChat && me.isAdmin && d.sender === 'BlumTik ✅');
+                    box.innerHTML += `<div class="msg ${isMine ? 'mine' : 'theirs'}">${d.text}</div>`;
                 });
                 box.scrollTop = box.scrollHeight;
             });
         }
 
-        function sendMsg() {
-            const inp = document.getElementById('m-input');
-            if (inp.value.trim() && activeChat) {
-                db.ref('messages/' + activeChat).push({ sender: user.name1, text: inp.value.trim() });
-                inp.value = "";
-            }
-        }
-
-        // УПРАВЛЕНИЕ ОКНАМИ
-        function toggleSidebar(s) {
-            document.getElementById('sidebar').classList.toggle('active', s);
-            document.querySelector('.sidebar-overlay').classList.toggle('active', s);
-        }
-        function openScreen(id) {
-            toggleSidebar(false);
-            closeScreens();
-            document.getElementById('scr-' + id).classList.add('active');
-        }
-        function closeScreens() { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); }
-        function closeChat() { document.getElementById('chat-window').classList.remove('active'); }
-
-        // ПРОФИЛЬ И ФОТО
-        async function saveProf() {
-            const n2 = document.getElementById('p-name2').value.trim();
-            await db.ref('users/' + user.name1).update({ name2: n2 });
-            user.name2 = n2;
-            localStorage.setItem('bt_user_v6', JSON.stringify(user));
-            alert("Сохранено!");
-            launchApp();
-        }
-
-        function upPhoto(input) {
-            const reader = new FileReader();
-            reader.onload = async (e) => {
-                const b64 = e.target.result;
-                await db.ref('users/' + user.name1).update({ avatar: b64 });
-                user.avatar = b64;
-                localStorage.setItem('bt_user_v6', JSON.stringify(user));
-                updateAvatars();
-            };
-            reader.readAsDataURL(input.files[0]);
-        }
-
-        function updateAvatars() {
-            const img = user.avatar ? `<img src="${user.avatar}">` : user.name1[0].toUpperCase();
-            document.getElementById('side-avatar').innerHTML = img;
-            document.getElementById('p-avatar').innerHTML = img;
+        function sendMessageNow() {
+            const inp = document.getElementById('msg-input');
+            if(!inp.value.trim() || !activeChat) return;
+            
+            const senderName = (isSystemChat && me.isAdmin) ? "BlumTik ✅" : me.name1;
+            
+            db.ref('messages/' + activeChat).push({
+                sender: senderName,
+                text: inp.value.trim(),
+                ts: Date.now()
+            });
+            inp.value = "";
         }
 
         function loadAdmin() {
-            const list = document.getElementById('adm-users');
+            const list = document.getElementById('admin-users');
             db.ref('users').on('value', snap => {
                 list.innerHTML = "";
                 snap.forEach(u => {
-                    const ud = u.val();
-                    const d = document.createElement('div');
-                    d.className = "side-item";
-                    d.innerHTML = `<span>${ud.name2} (@${ud.name1})</span> <button onclick="admSend('${ud.name1}')" style="background:var(--primary); color:white; border:none; padding:5px; border-radius:5px;">Написать</button>`;
-                    list.appendChild(d);
+                    const user = u.val();
+                    if(user.name1 === me.name1) return;
+                    list.innerHTML += `<div class="admin-user-card">
+                        <b>${user.name2} (@${user.name1})</b><br><br>
+                        <button class="btn" style="padding:5px;" onclick="startChat('system_${user.name1}', 'Бот -> ${user.name2}', true)">Смотреть чат с ботом</button>
+                    </div>`;
                 });
             });
         }
 
-        function admSend(target) {
-            const m = prompt("Текст от системы:");
-            if (m) db.ref('messages/system_' + target).push({ sender: 'BlumTik ✅', text: m });
+        function closeChat() { document.getElementById('chat-ui').classList.remove('active'); db.ref('messages/' + activeChat).off(); }
+        function toggleMenu(s) { document.getElementById('sidebar').classList.toggle('active', s); }
+        function openScr(id) { toggleMenu(false); document.getElementById('scr-'+id).classList.add('active'); }
+        function closeScrs() { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); }
+
+        function uploadAv(input) {
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const b64 = e.target.result;
+                await db.ref('users/' + me.name1).update({ avatar: b64 });
+                me.avatar = b64;
+                localStorage.setItem('bt_v8', JSON.stringify(me));
+                updateAvUI();
+            };
+            reader.readAsDataURL(input.files[0]);
         }
 
-        function logout() { localStorage.removeItem('bt_user_v6'); location.reload(); }
+        function updateAvUI() {
+            const img = me.avatar ? `<img src="${me.avatar}" style="width:100%; height:100%; object-fit:cover;">` : me.name1[0].toUpperCase();
+            document.getElementById('my-av-box').innerHTML = img;
+            document.getElementById('p-av').innerHTML = img;
+        }
+
+        async function saveProf() {
+            const n = document.getElementById('p-n2-in').value.trim();
+            if(n) {
+                await db.ref('users/' + me.name1).update({ name2: n });
+                me.name2 = n;
+                localStorage.setItem('bt_v8', JSON.stringify(me));
+                alert("Имя изменено!");
+                launch();
+            }
+        }
+
+        function logout() { localStorage.removeItem('bt_v8'); location.reload(); }
     </script>
 </body>
 </html>
